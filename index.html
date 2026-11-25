@@ -21,15 +21,19 @@ pre{white-space:pre-wrap;font:13px/1.4 ui-monospace,Menlo,monospace;color:var(--
 </main>
 <script>
 (function(){
-  var q=new URLSearchParams(location.hash.slice(1)),to=q.get('to')||'',s=q.get('s')||'',b=q.get('b')||'';
-  if(!to&&!s&&!b){document.getElementById('h').textContent='Nothing to send';document.getElementById('sub').textContent='Open this from the Chase button in the Command Centre.';return}
-  var e=encodeURIComponent,
+  // Email details arrive in the link (query string, or after the #).
+  var q=new URLSearchParams(location.search),h=new URLSearchParams(location.hash.slice(1)),g=function(k){return h.get(k)||q.get(k)||''},
+      to=g('to'),s=g('s'),b=g('b'),e=encodeURIComponent;
+  if(!to&&!s&&!b){document.getElementById('h').textContent='Nothing to send';document.getElementById('sub').textContent='Open this from the Chase button in the Command Centre. The buttons open a blank email.';
+    document.getElementById('ol').href='ms-outlook://compose';document.getElementById('mt').href='mailto:';return}
+  var
       ol='ms-outlook://compose?to='+e(to)+'&subject='+e(s)+'&body='+e(b),
       mt='mailto:'+to+'?subject='+e(s)+'&body='+e(b.replace(/\r?\n/g,'\r\n'));
   document.getElementById('ol').href=ol;document.getElementById('mt').href=mt;
   document.getElementById('pv').textContent='To: '+to+'\nSubject: '+s+'\n\n'+b;
   document.getElementById('cp').onclick=function(){var t='To: '+to+'\nSubject: '+s+'\n\n'+b;
     (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){document.getElementById('cp').textContent='Copied'},function(){document.getElementById('cp').textContent='Copy failed — select the text below'})};
+  // Keep the email out of browser history, then hand it to the Outlook app.
   try{history.replaceState(null,'',location.pathname)}catch(x){}
   setTimeout(function(){location.href=ol},150);
 })();
